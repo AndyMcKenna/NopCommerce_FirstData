@@ -1,0 +1,198 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Copyright>Copyright © BitShift Web Solutions LLC</Copyright>
+    <Company>BitShift Web Solutions LLC</Company>
+    <Authors>Andy McKenna, BitShift Web Solutions LLC</Authors>
+    <Version>4.1.11</Version>
+    <Description>This plugin allows you accept credit card payments</Description>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl>http://www.bitshiftweb.com/</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Data\FirstDataStoreSettingMap.cs" />
+    <None Remove="Data\SavedCardMap.cs" />
+    <None Remove="Data\FirstDataObjectContext.cs" />
+    <None Remove="DependencyRegistrar.cs" />
+    <None Remove="Domain\Constants.cs" />
+    <None Remove="Domain\SavedCard.cs" />
+    <None Remove="FirstDataPaymentProcessor.cs" />
+    <None Remove="Domain\FirstDataStoreSetting.cs" />
+    <None Remove="Controllers\FirstDataController.cs" />
+    <None Remove="FirstDataSettings.cs" />
+    <None Remove="Models\FirstDataStoreSettingModel.cs" />
+    <None Remove="Models\ConfigurationModel.cs" />
+    <None Remove="Models\PaymentInfoModel.cs" />
+    <None Remove="Models\SavedCardModel.cs" />
+    <None Remove="Properties\AssemblyInfo.cs" />
+    <None Remove="RouteProvider.cs" />
+    <None Remove="Services\FirstDataStoreSettingService.cs" />
+    <None Remove="Services\IFirstDataStoreSettingService.cs" />
+    <None Remove="Services\SavedCardService.cs" />
+    <None Remove="Services\ISavedCardService.cs" />
+    <None Remove="Services\TokenEventConsumer.cs" />
+    <None Remove="TransactMode.cs" />
+    <None Remove="Validators\PaymentInfoValidator.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Content\Images\amex.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Images\discover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Images\mastercard.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Images\visa.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UpgradeScripts\BitShift.FirstData.Upgrade_04.sql" />
+    <Content Include="UpgradeScripts\BitShift.FirstData.Upgrade_08.sql" />
+    <Content Include="Views\Configure\_Configure.Configure.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Configure\Configure.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Configure\_StoreSettings.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payment\SavedCards.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payment\SavedCardsLink.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payment\SavedCardsTable.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Images\ico-delete.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="logo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Notes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
+    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+    <ProjectReference Include="..\..\Libraries\Nop.Data\Nop.Data.csproj" />
+    <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Content\style.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Configure\_Configure.Stores.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Payment\HostedPayment.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Payment\PaymentInfo.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Payment\_PaymentResponse.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+ 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+
+  <Target Name="ReadAssemblyVersion">
+
+    <ReadLinesFromFile File="plugin.json">
+      <Output TaskParameter="Lines" ItemName="ItemsFromFile" />
+    </ReadLinesFromFile>
+
+    <PropertyGroup>
+      <Pattern>Version": "(\d+)\.(\d+)\.(\d+)</Pattern>
+      <In>@(ItemsFromFile)</In>
+      <VersionNumber>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern)).ToString().Remove(0, 11))</VersionNumber>
+    </PropertyGroup>
+
+    <Message Text="$(VersionNumber)" />
+  </Target>
+
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Xml">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Xml.Linq">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+ALTER TABLE BitShift_FirstData_StoreSetting ADD PaymentPageID nvarchar(128)
+ALTER TABLE BitShift_FirstData_StoreSetting ADD TransactionKey nvarchar(128)
+ALTER TABLE BitShift_FirstData_StoreSetting ADD ResponseKey nvarchar(128)
+
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.PaymentPageID', 'Payment Page ID')
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.PaymentPageID.Hint', 'The payment page to use during checkout')
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.TransactionKey', 'Transaction Key')
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.TransactionKey.Hint', 'The payment page''s transaction key')
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.ResponseKey', 'Response Key')
+INSERT INTO LocaleStringResource (LanguageId, ResourceName, ResourceValue) VALUES (1, 'BitShift.Plugin.FirstData.Fields.ResponseKey.Hint', 'The response key First Data will send back to the plugin')

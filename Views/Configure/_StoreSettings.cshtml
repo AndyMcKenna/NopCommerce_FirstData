@@ -1,0 +1,214 @@
+﻿@{
+    Layout = "";
+}
+@model FirstDataStoreSettingModel
+@using BitShift.Plugin.Payments.FirstData.Models;
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-9">
+                    @if (Model.UseDefaultSettings)
+                    {
+                        <p>This store is using the default settings.  Complete the form and press Save to switch to store specific settings.</p>
+                    }
+                    else if (Model.StoreID != 0)
+                    {
+                        <p>This store is using specific settings.  Click here to revert to the default settings. </p>
+                        <button id="revertStoreSettings">@T("BitShift.Plugin.FirstData.Stores.Revert")</button>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="StoreName" />
+                </div>
+                <div class="col-md-9">
+                    @Html.DisplayFor(model => model.StoreName)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="UseSandbox" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="UseSandbox" />
+                    <span asp-validation-for="UseSandbox" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="TransactModeValues" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="TransactModeId" asp-items="Model.TransactModeValues" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="GatewayID" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="GatewayID" />
+                    <span asp-validation-for="GatewayID" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="HMAC" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HMAC" />
+                    <span asp-validation-for="HMAC" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="Password" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="Password" />
+                    <span asp-validation-for="Password" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="KeyID" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="KeyID" />
+                    <span asp-validation-for="KeyID" />
+                </div>
+            </div>
+            <div class="form-group payment-page">
+                <div class="col-md-2">
+                    <nop-label asp-for="PaymentPageID" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="PaymentPageID" />
+                    <span asp-validation-for="PaymentPageID" />
+                </div>
+            </div>
+            <div class="form-group payment-page">
+                <div class="col-md-2">
+                    <nop-label asp-for="TransactionKey" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="TransactionKey" />
+                    <span asp-validation-for="TransactionKey" />
+                </div>
+            </div>
+            <div class="form-group payment-page">
+                <div class="col-md-2">
+                    <nop-label asp-for="ResponseKey" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ResponseKey" />
+                    <span asp-validation-for="ResponseKey" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="AdditionalFee" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AdditionalFee" />
+                    <span asp-validation-for="AdditionalFee" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2">
+                    <nop-label asp-for="AdditionalFeePercentage" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AdditionalFeePercentage" />
+                    <span asp-validation-for="AdditionalFeePercentage" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="EnableRecurringPayments" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EnableRecurringPayments" />
+                    <span asp-validation-for="EnableRecurringPayments" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="EnableCardSaving" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EnableCardSaving" />
+                    <span asp-validation-for="EnableCardSaving" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="EnablePurchaseOrderNumber" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EnablePurchaseOrderNumber" />
+                    <span asp-validation-for="EnablePurchaseOrderNumber" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="AllowVisa" />
+                </div>
+                <div class=" col-md-9">
+                    <nop-editor asp-for="AllowVisa" />
+                    <span asp-validation-for="AllowVisa" />
+                </div>
+            </div>
+            <div class=" form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="AllowMastercard" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AllowMastercard" />
+                    <span asp-validation-for="AllowMastercard" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="AllowAmex" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AllowAmex" />
+                    <span asp-validation-for="AllowAmex" />
+                </div>
+            </div>
+            <div class="form-group direct-payment">
+                <div class="col-md-2">
+                    <nop-label asp-for="AllowDiscover" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AllowDiscover" />
+                    <span asp-validation-for="AllowDiscover" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#TransactModeId").change(changeTransactMode);
+        changeTransactMode();
+    });
+
+    function changeTransactMode()
+    {
+        if ($("#TransactModeId").val() == "4" ||
+            $("#TransactModeId").val() == "5") {
+            $(".direct-payment").hide();
+            $(".payment-page").show();
+        }
+        else {
+            $(".direct-payment").show();
+            $(".payment-page").hide();
+        }
+    }
+</script>

@@ -1,0 +1,92 @@
+﻿@model ConfigurationModel
+@using BitShift.Plugin.Payments.FirstData.Models;
+
+<p>@T("BitShift.Plugin.FirstData.StoreNotes")</p>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-2">
+                            <div class="label-wrapper">
+                                <label class="control-label" title="" for="StoreName">Store</label>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="Stores" asp-items="Model.Stores" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="store-settings-content"></div>
+        <div class="form-group">
+            <div class="col-md-2">
+                <input type="button" id="saveStoreSettings" class="btn btn-info" value="@T("Admin.Common.Save")" />
+            </div>
+            <div class="col-md-9" id="saveStoreMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Stores").val(0);
+        refreshForm();
+        $("#Stores").change(refreshForm);
+        $("#revertStoreSettings").click(revertToDefaultSettings);
+        $("#saveStoreSettings").click(function () {
+            var model = {
+                StoreID: $("#Stores").val(),
+                UseSandbox: $("#UseSandbox").is(":checked"),
+                TransactModeId: $("#TransactModeId").val(),
+                GatewayID: $("#GatewayID").val(),
+                HMAC: $("#HMAC").val(),
+                Password: $("#Password").val(),
+                KeyID: $("#KeyID").val(),
+                PaymentPageID: $("#PaymentPageID").val(),
+                TransactionKey: $("#TransactionKey").val(),
+                ResponseKey: $("#ResponseKey").val(),
+                AdditionalFee: $("#AdditionalFee").val(),
+                AdditionalFeePercentage: $("#AdditionalFeePercentage").is(":checked"),
+                EnableRecurringPayments: $("#EnableRecurringPayments").is(":checked"),
+                EnableCardSaving: $("#EnableCardSaving").is(":checked"),
+                EnablePurchaseOrderNumber: $("#EnablePurchaseOrderNumber").is(":checked"),
+                AllowVisa: $("#AllowVisa").is(":checked"),
+                AllowMastercard: $("#AllowMastercard").is(":checked"),
+                AllowAmex: $("#AllowAmex").is(":checked"),
+                AllowDiscover: $("#AllowDiscover").is(":checked")
+            };
+            $.post("/Admin/FirstData/SaveStoreSettings", model, function (result) {
+                if (result == "success") {
+                    refreshForm();
+                    $("#saveStoreMessage").html("@T("BitShift.Plugin.FirstData.StoreSettingsSaved")").css("color", "#009900").fadeOut(5000, function () {
+                        $(this).html("");
+                        $(this).show();
+                    });
+                }
+                else {
+                    $("#saveStoreMessage").html(result).css("color", "#990000").fadeOut(5000, function () {
+                        $(this).html("");
+                        $(this).show();
+                    });
+                }
+            });
+        });
+    });
+
+    function revertToDefaultSettings(storeId) {
+        $.post("/Admin/FirstData/RevertStoreSettings", { storeId: $("#Stores").val() }, function () {
+            refreshForm();
+        })
+    }
+
+    function refreshForm() {
+        $.get("/Admin/FirstData/GetStoreSettings", { storeId: $("#Stores").val() }, function (result) {
+            $("#store-settings-content").html(result);
+            $("#revertStoreSettings").click(revertToDefaultSettings);
+        });
+    }
+</script>
+   
