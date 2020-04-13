@@ -2,7 +2,7 @@
   "Group": "Payment methods",
   "FriendlyName": "Credit Card",
   "SystemName": "BitShift.Payments.FirstData",
-  "Version": "4.2.11",
+  "Version": "4.2.12",
   "SupportedVersions": [ "4.20" ],
   "Author": "Andy McKenna (BitShift Web Solutions)",
   "DisplayOrder": 1,
