@@ -9,7 +9,7 @@ Each version of NopCommerce requires a different version of the plugin.  There i
 
 To run multiple versions locally, clone [NopCommerce releases](https://github.com/nopSolutions/nopCommerce/releases) to individual directories and then clone the matching branch of this plugin into the \Plugins directory.
 
-Open the NopCommerce solution and right click the Plugins folder, Add -> Existing Project -> find Plugins\NopCommerce_FirstData\BitShift.Plugin.Payments.FirstData.csproj.  Do the same for BitShift.Plugin.Payments.FirstData.Tests.csproj in the Tests folder.
+Open the NopCommerce solution and right click the Plugins folder, Add -> Existing Project -> find Plugins\NopCommerce_FirstData\Plugin\BitShift.Plugin.Payments.FirstData.csproj.  Do the same for BitShift.Plugin.Payments.FirstData.Tests.csproj in the Tests folder.
 
 Building the solution should now output the plugin files to Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData.  The plugin will be available to install in the Admin section.
 

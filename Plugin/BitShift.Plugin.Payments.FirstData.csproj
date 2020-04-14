@@ -93,10 +93,18 @@
     <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
-    <ProjectReference Include="..\..\Libraries\Nop.Data\Nop.Data.csproj" />
-    <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
-    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\..\Libraries\Nop.Core\Nop.Core.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\Nop.Data\Nop.Data.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\Nop.Services\Nop.Services.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj">
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -118,12 +126,12 @@
   </ItemGroup>
  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData</OutputPath>
+    <OutputPath>Output</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData</OutputPath>
+    <OutputPath>Output</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
 
@@ -195,4 +203,8 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)Output&quot; &quot;$(ProjectDir)&quot;..\..\..\&quot;Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData&quot; /i /s /y&#xD;&#xA;del &quot;$(ProjectDir)..\..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData\*.pdb&quot;&#xD;&#xA;del &quot;$(ProjectDir)..\..\..\Presentation\Nop.Web\Plugins\BitShift.Payments.FirstData\*.deps.json&quot;" />
+  </Target>
 </Project>
