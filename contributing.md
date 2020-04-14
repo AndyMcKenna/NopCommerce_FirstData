@@ -10,7 +10,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 1. Ensure all existing unit tests pass successfully
 2. Any new changes should come with new unit tests whenever possible.
-3. Changes that require changes to the core NopCommerce code will be rejected.
+3. PRs that require changes to the core NopCommerce code will be rejected.
 
 ### Attribution
 
