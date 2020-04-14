@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Tests\Nop.Tests\Nop.Tests.csproj" />
-    <ProjectReference Include="..\..\..\..\Tests\Nop.Web.MVC.Tests\Nop.Web.MVC.Tests.csproj" />
-    <ProjectReference Include="..\..\Plugin\BitShift.Plugin.Payments.FirstData.csproj" />
+    <ProjectReference Include="..\..\..\Tests\Nop.Tests\Nop.Tests.csproj" />
+    <ProjectReference Include="..\..\..\Tests\Nop.Web.MVC.Tests\Nop.Web.MVC.Tests.csproj" />
+    <ProjectReference Include="..\Plugin\BitShift.Plugin.Payments.FirstData.csproj" />
   </ItemGroup>
 
 </Project>
