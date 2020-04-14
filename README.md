@@ -18,10 +18,10 @@ Installing the plugin will add the BitShift_FirstData_* tables to the database. 
 ## Configuration
 First Data requires 4 distinct pieces of info to accept transactions from your store: Gateway ID, Password, Key ID, and HMAC.  If you are testing out the plugin, the first step is to register for a demo account with First Data here. Once you are in, click Administration at the top right, then Terminals.  Select the Terminal with ECOMM in the name.
 
-* Image *
+![FirstData_Gateway Password](https://user-images.githubusercontent.com/29063167/79176503-676aaa00-7dce-11ea-998a-4f3ee22d972c.png)
 
 In the middle of this form, you will see Password.  You might have to click Generate to get one.  This is the password field for the plugin and the Gateway ID is here, too. It's important to note that the Password is separate from the username/password you used to log in.  Click on the API Access tab and generate a new HMAC Key.  The Key ID is on this page, also.  Click Update at the bottom to save the HMAC.
 
-* Image *
+![FirstData_Key HMAC](https://user-images.githubusercontent.com/29063167/79176508-6a659a80-7dce-11ea-963e-0b5f4e3b0b2e.png)
 
 You'll have to do it again if you are using the Production version.  The demo info will only work in Sandbox mode and the Production info will only work if Sandbox is turned off.  If you have any other questions don't hesitate to use the contact form.
