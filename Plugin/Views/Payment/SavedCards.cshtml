@@ -1,14 +1,14 @@
 ﻿@using Nop.Web.Framework.UI;
 @using BitShift.Plugin.Payments.FirstData.Domain;
 @{
-    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+  Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
 
-    //title
-    Html.AddTitleParts(T("BitShift.Plugin.FirstData.SavedCards").Text);
+  //title
+  Html.AddTitleParts(T("BitShift.Plugin.FirstData.SavedCards").Text);
 }
 @section left
-{
-    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = 0 })
+  {
+  @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = 0 })
 }
 
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"
@@ -39,49 +39,49 @@
 </script>
 
 <style>
-    #savedCardsContainer table {
-        margin-top: 30px;
+  #savedCardsContainer table {
+    margin-top: 30px;
+  }
+
+  #savedCardsContainer th {
+    text-align: left;
+  }
+
+  #savedCardsContainer tr.expired {
+    background-color: #ff0000;
+  }
+
+  #savedCardsContainer td.deleteRow {
+    width: 40px;
+  }
+
+    #savedCardsContainer td.deleteRow input {
+      height: 30px;
+      color: #fff;
+      background-color: #4ab2f1;
+      padding: 0 15px;
     }
 
-    #savedCardsContainer th {
-        text-align: left;
-    }
+  #savedCardsContainer td.type, #savedCardsContainer th.type {
+    text-align: center;
+    width: 15%;
+  }
 
-    #savedCardsContainer tr.expired {
-        background-color: #ff0000;
-    }
+  #savedCardsContainer td.name, #savedCardsContainer th.name {
+    padding-left: 5px;
+  }
 
-    #savedCardsContainer td.deleteRow {
-        width: 40px;
-    }
+  #savedCardsContainer td.number, #savedCardsContainer th.number {
+    padding-left: 5px;
+    width: 15%;
+  }
 
-        #savedCardsContainer td.deleteRow input {
-            height: 30px;
-            color: #fff;
-            background-color: #4ab2f1;
-            padding: 0 15px;
-        }
+  #savedCardsContainer td.expires, #savedCardsContainer th.expires {
+    text-align: center;
+    width: 10%;
+  }
 
-    #savedCardsContainer td.type, #savedCardsContainer th.type {
-        text-align: center;
-        width: 15%;
-    }
-
-    #savedCardsContainer td.name, #savedCardsContainer th.name {
-        padding-left: 5px;
-    }
-
-    #savedCardsContainer td.number, #savedCardsContainer th.number {
-        padding-left: 5px;
-        width: 15%;
-    }
-
-    #savedCardsContainer td.expires, #savedCardsContainer th.expires {
-        text-align: center;
-        width: 10%;
-    }
-
-    #savedCardsContainer td.expired {
-        color: #ff0000;
-    }
+  #savedCardsContainer td.expired {
+    color: #ff0000;
+  }
 </style>

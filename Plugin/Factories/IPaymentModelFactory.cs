@@ -4,19 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BitShift.Plugin.Payments.FirstData.Factories
 {
+  /// <summary>
+  /// Represents the interface of the common models factory
+  /// </summary>
+  public partial interface IPaymentModelFactory
+  {
     /// <summary>
-    /// Represents the interface of the common models factory
+    /// Prepare the payment info model
     /// </summary>
-    public partial interface IPaymentModelFactory
-    {
-        /// <summary>
-        /// Prepare the payment info model
-        /// </summary>
-        /// <returns>Payment info model</returns>
-        PaymentInfoModel PreparePaymentInfoModel();
+    /// <returns>Payment info model</returns>
+    PaymentInfoModel PreparePaymentInfoModel();
 
-        PaymentInfoModel PrepareHostedModel(IUrlHelper urlHelper);
+    PaymentInfoModel PrepareHostedModel(IUrlHelper urlHelper);
 
-        PaymentResponseModel PreparePaymentResponseModel(IFormCollection formCollection);
-    }
+    PaymentResponseModel PreparePaymentResponseModel(IFormCollection formCollection);
+  }
 }

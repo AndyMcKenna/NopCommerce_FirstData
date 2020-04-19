@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = "";
+  Layout = "";
 }
 @model BitShift.Plugin.Payments.FirstData.Models.PaymentInfoModel
 
@@ -9,41 +9,41 @@
 
 @if (Model.UseHostedPage)
 {
-    <div id="payment-error"></div>
-    <iframe id="hostedPageFrame" src="/Plugins/FirstData/GetHostedPaymentForm"></iframe>
-    <style>
-        .checkout-page .button-1.payment-info-next-step-button {
-            display: none;
-        }
-    </style>
+  <div id="payment-error"></div>
+  <iframe id="hostedPageFrame" src="/Plugins/FirstData/GetHostedPaymentForm"></iframe>
+  <style>
+    .checkout-page .button-1.payment-info-next-step-button {
+      display: none;
+    }
+  </style>
 }
 else
 {
-    if (Model.SavedCards.Count > 0)
-    {
-        <p class="paymentTitle">@Model.SavedCardsLabel</p>
-        <div class="savedCards">
-            @foreach (var card in Model.SavedCards)
-            {
-                <div class="savedCard">
-                    @if (!card.IsExpired)
-                    {
-                        <input type="button" class="useCard" data-cardid="@card.Id" value="@card.UseCardLabel" />
-                    }
+  if (Model.SavedCards.Count > 0)
+  {
+    <p class="paymentTitle">@Model.SavedCardsLabel</p>
+    <div class="savedCards">
+      @foreach (var card in Model.SavedCards)
+      {
+        <div class="savedCard">
+          @if (!card.IsExpired)
+          {
+            <input type="button" class="useCard" data-cardid="@card.Id" value="@card.UseCardLabel" />
+          }
 
-                    @string.Format(card.CardDescription, card.CardType, card.Last4Digits)<br />
-                    @string.Format(card.ExpirationDescription, card.ExpireMonth, card.ExpireYear)
-                    @if (card.IsExpired)
-                    {
-                        <span style="color:#ff0000">@card.ExpiredLabel</span>
-                    }
-                </div>
-            }
-            <div style="clear:both"></div>
-            <input type="hidden" id="savedCardId" name="savedCardId" />
+          @string.Format(card.CardDescription, card.CardType, card.Last4Digits)<br />
+          @string.Format(card.ExpirationDescription, card.ExpireMonth, card.ExpireYear)
+          @if (card.IsExpired)
+          {
+            <span style="color:#ff0000">@card.ExpiredLabel</span>
+          }
         </div>
+      }
+      <div style="clear:both"></div>
+      <input type="hidden" id="savedCardId" name="savedCardId" />
+    </div>
 
-        <script type="text/javascript">
+    <script type="text/javascript">
             $(document).ready(function () {
                 $(".useCard").click(function () {
                     $("#savedCardId").val($(this).data("cardid"));
@@ -57,76 +57,76 @@ else
                     }
                 });
             });
-        </script>
+    </script>
+  }
+  <p class="paymentTitle">@Model.NewCardLabel</p>
+  <table width="100%" cellspacing="2" cellpadding="1" border="0">
+    <tr>
+      <td>
+        <nop-label asp-for="CreditCardTypes" asp-display-hint="false" />
+      </td>
+      <td>
+        <nop-select asp-for="CreditCardType" asp-items="Model.CreditCardTypes" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <nop-label asp-for="CardholderName" asp-display-hint="false" />
+      </td>
+      <td>
+        <nop-editor asp-for="CardholderName" />@*new { style = "Width: 165px;", autocomplete = "off" })*@
+        <span asp-validation-for="CardholderName"></span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <nop-label asp-for="CardNumber" asp-display-hint="false" />
+      </td>
+      <td>
+        <nop-editor asp-for="CardNumber" />@*new { style = "Width: 165px;", autocomplete = "off", maxlength = 22 })*@
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <nop-label asp-for="ExpireMonth" asp-display-hint="false" />
+      </td>
+      <td>
+        <nop-select asp-for="ExpireMonth" asp-items="Model.ExpireMonths" />
+        /
+        <nop-select asp-for="ExpireYear" asp-items="Model.ExpireYears" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <nop-label asp-for="CardCode" asp-display-hint="false" />
+      </td>
+      <td>
+        <nop-editor asp-for="CardCode" />@*new { style = "Width: 60px;", autocomplete = "off", maxlength = 4 })*@
+        <span asp-validation-for="CardCode"></span>
+      </td>
+    </tr>
+    @if (Model.EnablePurchaseOrderNumber)
+    {
+      <tr>
+        <td>
+          <nop-label asp-for="PurchaseOrderNumber" asp-display-hint="false" />
+        </td>
+        <td>
+          <nop-editor asp-for="PurchaseOrderNumber" />
+          <span asp-validation-for="PurchaseOrderNumber"></span>
+        </td>
+      </tr>
     }
-    <p class="paymentTitle">@Model.NewCardLabel</p>
-    <table width="100%" cellspacing="2" cellpadding="1" border="0">
-        <tr>
-            <td>
-                <nop-label asp-for="CreditCardTypes" asp-display-hint="false" />
-            </td>
-            <td>
-                <nop-select asp-for="CreditCardType" asp-items="Model.CreditCardTypes" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <nop-label asp-for="CardholderName" asp-display-hint="false" />
-            </td>
-            <td>
-                <nop-editor asp-for="CardholderName" />@*new { style = "Width: 165px;", autocomplete = "off" })*@
-                <span asp-validation-for="CardholderName"></span>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <nop-label asp-for="CardNumber" asp-display-hint="false" />
-            </td>
-            <td>
-                <nop-editor asp-for="CardNumber" />@*new { style = "Width: 165px;", autocomplete = "off", maxlength = 22 })*@
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <nop-label asp-for="ExpireMonth" asp-display-hint="false" />
-            </td>
-            <td>
-                <nop-select asp-for="ExpireMonth" asp-items="Model.ExpireMonths" />
-                /
-                <nop-select asp-for="ExpireYear" asp-items="Model.ExpireYears" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <nop-label asp-for="CardCode" asp-display-hint="false" />
-            </td>
-            <td>
-                <nop-editor asp-for="CardCode" />@*new { style = "Width: 60px;", autocomplete = "off", maxlength = 4 })*@
-                <span asp-validation-for="CardCode"></span>
-            </td>
-        </tr>
-        @if (Model.EnablePurchaseOrderNumber)
-        {
-            <tr>
-                <td>
-                    <nop-label asp-for="PurchaseOrderNumber" asp-display-hint="false" />
-                </td>
-                <td>
-                    <nop-editor asp-for="PurchaseOrderNumber" />
-                    <span asp-validation-for="PurchaseOrderNumber"></span>
-                </td>
-            </tr>
-        }
-        @if (Model.EnableCardSaving)
-        {
-            <tr>
-                <td>
-                    <nop-label asp-for="SaveCard" asp-display-hint="false" />
-                </td>
-                <td>
-                    <nop-editor asp-for="SaveCard" />
-                </td>
-            </tr>
-        }
-    </table>
+    @if (Model.EnableCardSaving)
+    {
+      <tr>
+        <td>
+          <nop-label asp-for="SaveCard" asp-display-hint="false" />
+        </td>
+        <td>
+          <nop-editor asp-for="SaveCard" />
+        </td>
+      </tr>
+    }
+  </table>
 }

@@ -6,6 +6,7 @@ using System.Threading;
 using BitShift.Plugin.Payments.FirstData.Domain;
 using BitShift.Plugin.Payments.FirstData.Models;
 using BitShift.Plugin.Payments.FirstData.Validators;
+using BitShift.Plugin.Payments.FirstData.Tests.MockData;
 using Moq;
 using Nop.Services.Localization;
 using Nop.Tests;
@@ -21,38 +22,8 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     private Mock<ILocalizationService> _localizationService;
     private FirstDataStoreSetting _storeSetting;
 
-    private Dictionary<string, List<string>> _testCardNumbers = new Dictionary<string, List<string>>
-    {
-      { "Amex", new List<string>
-        {
-          "378282246310005",
-          "371449635398431",
-          "378734493671000"
-        }
-      },
-      { "Discover", new List<string>
-        {
-          "6011000990139424",
-          "6011111111111117"
-        }
-      },
-      { "Mastercard", new List<string>
-        {
-          "5555555555554444",
-          "5105105105105100"
-        }
-      },
-      { "Visa", new List<string>
-        {
-          "4111111111111111",
-          "4012888888881881",
-          "4222222222222"
-        }
-      }
-    };
-
     [SetUp]
-    public void Setup()
+    public override void Setup()
     {
       Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
 
@@ -77,13 +48,14 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       var paymentInfoModel = new PaymentInfoModel
       {
         CardholderName = "John Doe",
-        CardNumber = _testCardNumbers["Visa"].First(),
+        CardNumber = CardNumbers.Real["Visa"].First(),
         CardCode = "123",
         ExpireMonth = "01",
         ExpireYear = (DateTime.Today.Year + 1).ToString()
       };
 
-      _validator.Validate(paymentInfoModel).IsValid.ShouldBeTrue();
+      var result = _validator.Validate(paymentInfoModel);
+      Assert.IsTrue(result.IsValid);
     }
 
     [Test]
@@ -98,9 +70,9 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
         ExpireYear = (DateTime.Today.Year + 1).ToString()
       };
 
-      foreach (var brand in _testCardNumbers.Keys)
+      foreach (var brand in CardNumbers.Real.Keys)
       {
-        foreach (var number in _testCardNumbers[brand])
+        foreach (var number in CardNumbers.Real[brand])
         {
           paymentInfoModel.CardNumber = number;
           if (!_validator.Validate(paymentInfoModel).IsValid)
@@ -124,10 +96,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       };
 
       var result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "CardholderName" && e.ErrorMessage == "Payment.CardholderName.Required")
-          .ShouldBeTrue();
+
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "CardholderName" && e.ErrorMessage == "Payment.CardholderName.Required"));
     }
 
     [Test]
@@ -143,24 +115,22 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       };
 
       var result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong")
-          .ShouldBeTrue();
+
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong"));
 
       paymentInfoModel.CardCode = "12345";
       result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong")
-          .ShouldBeTrue();
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong"));
 
       paymentInfoModel.CardCode = "abc";
       result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong")
-          .ShouldBeTrue();
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "CardCode" && e.ErrorMessage == "Payment.CardCode.Wrong"));
     }
 
     [Test]
@@ -176,10 +146,9 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       };
 
       var result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "ExpireMonth" && e.ErrorMessage == "Payment.ExpireMonth.Required")
-          .ShouldBeTrue();
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "ExpireMonth" && e.ErrorMessage == "Payment.ExpireMonth.Required"));
     }
 
     [Test]
@@ -195,10 +164,9 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       };
 
       var result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "ExpireYear" && e.ErrorMessage == "Payment.ExpireYear.Required")
-          .ShouldBeTrue();
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "ExpireYear" && e.ErrorMessage == "Payment.ExpireYear.Required"));
     }
 
     [Test]
@@ -214,20 +182,18 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       };
 
       var result = _validator.Validate(paymentInfoModel);
-      result.IsValid.ShouldBeFalse();
-      result.Errors
-          .Any(e => e.PropertyName == "ExpiryDate" && e.ErrorMessage == "BitShift.Plugin.FirstData.ExpiryDateError")
-          .ShouldBeTrue();
+      Assert.IsFalse(result.IsValid);
+      Assert.IsTrue(result.Errors
+          .Any(e => e.PropertyName == "ExpiryDate" && e.ErrorMessage == "BitShift.Plugin.FirstData.ExpiryDateError"));
 
       if (DateTime.Today.Month > 1)
       {
         paymentInfoModel.ExpireMonth = (DateTime.Today.Month - 1).ToString();
         paymentInfoModel.ExpireYear = DateTime.Today.Year.ToString();
         result = _validator.Validate(paymentInfoModel);
-        result.IsValid.ShouldBeFalse();
-        result.Errors
-            .Any(e => e.PropertyName == "ExpiryDate" && e.ErrorMessage == "BitShift.Plugin.FirstData.ExpiryDateError")
-            .ShouldBeTrue();
+        Assert.IsFalse(result.IsValid);
+        Assert.IsTrue(result.Errors
+            .Any(e => e.PropertyName == "ExpiryDate" && e.ErrorMessage == "BitShift.Plugin.FirstData.ExpiryDateError"));
       }
     }
 
@@ -323,19 +289,19 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     {
       var validator = new PaymentInfoValidator(_localizationService.Object, setting);
 
-      foreach (var brand in _testCardNumbers.Keys)
+      foreach (var brand in CardNumbers.Real.Keys)
       {
-        foreach (var number in _testCardNumbers[brand])
+        foreach (var number in CardNumbers.Real[brand])
         {
           paymentInfoModel.CardNumber = number;
           var result = validator.Validate(paymentInfoModel);
           if (brand == targettedBrand)
           {
-            result.IsValid.ShouldBeFalse();
+            Assert.IsFalse(result.IsValid);
           }
           else
           {
-            result.IsValid.ShouldBeTrue();
+            Assert.IsTrue(result.IsValid);
           }
         }
       }

@@ -5,18 +5,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BitShift.Plugin.Payments.FirstData.Models
 {
-    public class ConfigurationModel : BaseNopModel
-    {
-        [NopResourceDisplayName("BitShift.Plugin.FirstData.Fields.SandboxURL")]
-        public string SandboxURL { get; set; }
+  public class ConfigurationModel : BaseNopModel
+  {
+    [NopResourceDisplayName("BitShift.Plugin.FirstData.Fields.SandboxURL")]
+    public string SandboxURL { get; set; }
 
-        [NopResourceDisplayName("BitShift.Plugin.FirstData.Fields.ProductionURL")]
-        public string ProductionURL { get; set; }
+    [NopResourceDisplayName("BitShift.Plugin.FirstData.Fields.ProductionURL")]
+    public string ProductionURL { get; set; }
 
-        public IList<SelectListItem> Stores { get; set; }
+    public IList<SelectListItem> Stores { get; set; }
 
-        public bool SavedSuccessfully { get; set; }
+    public bool SavedSuccessfully { get; set; }
 
-        public string SaveMessage { get; set; }
-    }
+    public string SaveMessage { get; set; }
+  }
 }
