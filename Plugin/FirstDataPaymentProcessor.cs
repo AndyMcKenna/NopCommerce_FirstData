@@ -1,12 +1,10 @@
 ﻿using BitShift.Plugin.Payments.FirstData.Controllers;
-using BitShift.Plugin.Payments.FirstData.Data;
 using BitShift.Plugin.Payments.FirstData.Domain;
 using BitShift.Plugin.Payments.FirstData.Models;
 using BitShift.Plugin.Payments.FirstData.Services;
 using BitShift.Plugin.Payments.FirstData.Validators;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
-using Nop.Core.Domain;
 using Nop.Core.Domain.Cms;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
@@ -49,8 +47,6 @@ namespace BitShift.Plugin.Payments.FirstData
     private readonly ICustomerService _customerService;
     private readonly CurrencySettings _currencySettings;
     private readonly IWebHelper _webHelper;
-    private readonly IOrderTotalCalculationService _orderTotalCalculationService;
-    private readonly StoreInformationSettings _storeInformationSettings;
     private readonly IWorkContext _workContext;
     private readonly IStoreContext _storeContext;
     private readonly IEncryptionService _encryptionService;
@@ -58,12 +54,14 @@ namespace BitShift.Plugin.Payments.FirstData
     private readonly ILogger _logger;
     private readonly ISavedCardService _savedCardService;
     private readonly IOrderService _orderService;
-    private readonly FirstDataObjectContext _objectContext;
     private readonly IFirstDataStoreSettingService _firstDataStoreSettingService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IGenericAttributeService _genericAttributeService;
     private readonly IPaymentService _paymentService;
     private readonly IWebRequest _webRequest;
+    private readonly IAddressService _addressService;
+    private readonly IStateProvinceService _stateProvinceService;
+    private readonly ICountryService _countryService;
     private readonly WidgetSettings _widgetSettings;
 
     public const string SYSTEM_NAME = "BitShift.Payments.FirstData";
@@ -74,15 +72,15 @@ namespace BitShift.Plugin.Payments.FirstData
     public FirstDataPaymentProcessor(FirstDataSettings firstDataSettings,
         ISettingService settingService, ICurrencyService currencyService,
         ICustomerService customerService, CurrencySettings currencySettings,
-        IWebHelper webHelper, IOrderTotalCalculationService orderTotalCalculationService,
-        StoreInformationSettings storeInformationSettings, IWorkContext workContext,
+        IWebHelper webHelper, IWorkContext workContext,
         IEncryptionService encryptionService, ILocalizationService localizationService,
         ILogger logger, IWebRequest webRequest,
         ISavedCardService savedCardService, IOrderService orderService,
-        FirstDataObjectContext objectContext, IStoreContext storeContext,
+        IStoreContext storeContext, IAddressService addressService,
         IFirstDataStoreSettingService firstDataStoreSettingService, IPluginService pluginService,
         IHttpContextAccessor httpContextAccessor, IGenericAttributeService genericAttributeService,
-        IPaymentService paymentService,
+        IPaymentService paymentService, IStateProvinceService stateProvinceService,
+        ICountryService countryService,
         WidgetSettings widgetSettings)
     {
       _firstDataSettings = firstDataSettings;
@@ -91,8 +89,6 @@ namespace BitShift.Plugin.Payments.FirstData
       _customerService = customerService;
       _currencySettings = currencySettings;
       _webHelper = webHelper;
-      _orderTotalCalculationService = orderTotalCalculationService;
-      _storeInformationSettings = storeInformationSettings;
       _workContext = workContext;
       _encryptionService = encryptionService;
       _localizationService = localizationService;
@@ -100,13 +96,15 @@ namespace BitShift.Plugin.Payments.FirstData
       _webRequest = webRequest;
       _savedCardService = savedCardService;
       _orderService = orderService;
-      _objectContext = objectContext;
       _storeContext = storeContext;
       _firstDataStoreSettingService = firstDataStoreSettingService;
       _httpContextAccessor = httpContextAccessor;
       _genericAttributeService = genericAttributeService;
       _paymentService = paymentService;
       _widgetSettings = widgetSettings;
+      _addressService = addressService;
+      _stateProvinceService = stateProvinceService;
+      _countryService = countryService;
 
       var pluginDescriptor = pluginService.GetPluginDescriptorBySystemName<FirstDataPaymentProcessor>(SYSTEM_NAME, LoadPluginsMode.All);
       if (pluginDescriptor != null && pluginDescriptor.Installed)
@@ -163,8 +161,7 @@ namespace BitShift.Plugin.Payments.FirstData
       webRequest.Headers["Authorization"] = "GGE4_API " + keyID + ":" + base64_hash;
 
       // send request as stream
-      StreamWriter xml = null;
-      xml = new StreamWriter(webRequest.GetRequestStream());
+      StreamWriter xml = new StreamWriter(webRequest.GetRequestStream());
       xml.Write(transaction);
       xml.Flush();
       xml.Close();
@@ -253,6 +250,13 @@ namespace BitShift.Plugin.Payments.FirstData
       var result = new ProcessPaymentResult();
 
       var customer = _customerService.GetCustomerById(processPaymentRequest.CustomerId);
+      if (!customer.BillingAddressId.HasValue)
+      {
+        throw new ArgumentException("customer must have a billing address");
+      }
+      var billingAddress = _addressService.GetAddressById(customer.BillingAddressId.Value);
+      var billingState = _stateProvinceService.GetStateProvinceById(billingAddress.StateProvinceId.Value);
+      var billingCountry = _countryService.GetCountryById(billingAddress.CountryId.Value);
 
       if (_firstDataStoreSetting.TransactionMode == (int)TransactMode.HostedPaymentPagePostCapture ||
           _firstDataStoreSetting.TransactionMode == (int)TransactMode.HostedPaymentPageAuthOnly)
@@ -314,11 +318,12 @@ namespace BitShift.Plugin.Payments.FirstData
                 xml_writer.WriteElementString("Expiry_Date", processPaymentRequest.CreditCardExpireMonth.ToString("00") + processPaymentRequest.CreditCardExpireYear.ToString().Substring(2, 2));
                 xml_writer.WriteElementString("CardHoldersName", processPaymentRequest.CreditCardName);
                 xml_writer.WriteElementString("Card_Number", cardNumber);
-                xml_writer.WriteElementString("VerificationStr1", (customer.BillingAddress.Address1 ?? "") + "|"
-                                                                + (customer.BillingAddress.ZipPostalCode ?? "") + "|"
-                                                                + (customer.BillingAddress.StateProvince != null ? customer.BillingAddress.StateProvince.Name : "") + "|"
-                                                                + customer.BillingAddress.Country.ThreeLetterIsoCode);
-
+                
+                xml_writer.WriteElementString("VerificationStr1", (billingAddress.Address1 ?? "") + "|"
+                                                                + (billingAddress.ZipPostalCode ?? "") + "|"
+                                                                + (billingState?.Name ?? "") + "|"
+                                                                + billingCountry?.ThreeLetterIsoCode);
+                
                 xml_writer.WriteElementString("VerificationStr2", processPaymentRequest.CreditCardCvv2);
                 xml_writer.WriteElementString("CVD_Presence_Ind", "1");
               }
@@ -328,9 +333,9 @@ namespace BitShift.Plugin.Payments.FirstData
               xml_writer.WriteElementString("Customer_Ref", customer.CustomerGuid.ToString());
               xml_writer.WriteElementString("Reference_No", processPaymentRequest.OrderGuid.ToString());
               xml_writer.WriteElementString("Client_IP", _webHelper.GetCurrentIpAddress());
-              xml_writer.WriteElementString("ZipCode", customer.BillingAddress.ZipPostalCode ?? "");
+              xml_writer.WriteElementString("ZipCode", billingAddress.ZipPostalCode ?? "");
               xml_writer.WriteEndElement();
-              String xml_string = string_builder.ToString();
+              string xml_string = string_builder.ToString();
 
               try
               {
@@ -361,7 +366,7 @@ namespace BitShift.Plugin.Payments.FirstData
                     {
                       SavedCard card = new SavedCard
                       {
-                        BillingAddress_Id = customer.BillingAddress.Id,
+                        BillingAddress_Id = customer.BillingAddressId.Value,
                         CardholderName = processPaymentRequest.CreditCardName,
                         CardType = response.SelectSingleNode("CardType").InnerText,
                         Customer_Id = customer.Id,
@@ -444,6 +449,7 @@ namespace BitShift.Plugin.Payments.FirstData
     {
       var result = new CapturePaymentResult();
       var customValues = _paymentService.DeserializeCustomValues(capturePaymentRequest.Order);
+      var customer = _customerService.GetCustomerById(capturePaymentRequest.Order.CustomerId);
 
       StringBuilder string_builder = new StringBuilder();
       using (StringWriter string_writer = new StringWriter(string_builder))
@@ -460,7 +466,7 @@ namespace BitShift.Plugin.Payments.FirstData
           xml_writer.WriteElementString("Reference_No", capturePaymentRequest.Order.Id.ToString());
           xml_writer.WriteElementString("Transaction_Tag", customValues[Constants.TransactionTag].ToString());
           xml_writer.WriteEndElement();
-          String xml_string = string_builder.ToString();
+          string xml_string = string_builder.ToString();
 
           try
           {
@@ -491,7 +497,7 @@ namespace BitShift.Plugin.Payments.FirstData
           catch (Exception ex)
           {
             result.AddError(ex.Message);
-            _logger.Error("Error capturing payment", ex, capturePaymentRequest.Order.Customer);
+            _logger.Error("Error capturing payment", ex, customer);
           }
         }
       }
@@ -508,6 +514,7 @@ namespace BitShift.Plugin.Payments.FirstData
     {
       var result = new RefundPaymentResult();
       var customValues = _paymentService.DeserializeCustomValues(refundPaymentRequest.Order);
+      var customer = _customerService.GetCustomerById(refundPaymentRequest.Order.CustomerId);
       var latestRefundTag = customValues.Keys.Where(k => k.StartsWith("Refund Tag")).OrderByDescending(k => k).FirstOrDefault();
       var newRefundNumber = latestRefundTag == null ? 1 : Convert.ToInt32(latestRefundTag.Substring(10)) + 1;
       var newRefundTag = $"Refund Tag {newRefundNumber:D2}";
@@ -538,7 +545,7 @@ namespace BitShift.Plugin.Payments.FirstData
             xml_writer.WriteElementString("Authorization_Num", refundPaymentRequest.Order.CaptureTransactionId);
             xml_writer.WriteElementString("Transaction_Tag", customValues[Constants.TransactionTag].ToString());
             xml_writer.WriteEndElement();
-            String xml_string = string_builder.ToString();
+            string xml_string = string_builder.ToString();
 
             try
             {
@@ -569,7 +576,7 @@ namespace BitShift.Plugin.Payments.FirstData
             catch (Exception ex)
             {
               result.AddError(ex.Message);
-              _logger.Error("Error refunding payment - Sending to FD or reading response - " + string_builder.ToString(), ex, refundPaymentRequest.Order.Customer);
+              _logger.Error("Error refunding payment - Sending to FD or reading response - " + string_builder.ToString(), ex, customer);
             }
           }
         }
@@ -577,7 +584,7 @@ namespace BitShift.Plugin.Payments.FirstData
       catch (Exception ex)
       {
         result.AddError("Error refunding payment.  See Log for more details");
-        _logger.Error("Error refunding payment - Building request - " + string_builder.ToString(), ex, refundPaymentRequest.Order.Customer);
+        _logger.Error("Error refunding payment - Building request - " + string_builder.ToString(), ex, customer);
       }
 
       return result;
@@ -592,6 +599,7 @@ namespace BitShift.Plugin.Payments.FirstData
     {
       var result = new VoidPaymentResult();
       var customValues = _paymentService.DeserializeCustomValues(voidPaymentRequest.Order);
+      var customer = _customerService.GetCustomerById(voidPaymentRequest.Order.CustomerId);
 
       StringBuilder string_builder = new StringBuilder();
       using (StringWriter string_writer = new StringWriter(string_builder))
@@ -607,7 +615,7 @@ namespace BitShift.Plugin.Payments.FirstData
           xml_writer.WriteElementString("Authorization_Num", voidPaymentRequest.Order.AuthorizationTransactionId);
           xml_writer.WriteElementString("Transaction_Tag", customValues[Constants.TransactionTag].ToString());
           xml_writer.WriteEndElement();
-          String xml_string = string_builder.ToString();
+          string xml_string = string_builder.ToString();
 
           try
           {
@@ -632,7 +640,7 @@ namespace BitShift.Plugin.Payments.FirstData
           catch (Exception ex)
           {
             result.AddError(ex.Message);
-            _logger.Error("Error voiding payment", ex, voidPaymentRequest.Order.Customer);
+            _logger.Error("Error voiding payment", ex, customer);
           }
         }
       }
@@ -650,6 +658,13 @@ namespace BitShift.Plugin.Payments.FirstData
       var result = new ProcessPaymentResult();
 
       var customer = _customerService.GetCustomerById(processPaymentRequest.CustomerId);
+      if(!customer.BillingAddressId.HasValue)
+      {
+        throw new ArgumentException("customer must have a billing address");
+      }
+      var billingAddress = _addressService.GetAddressById(customer.BillingAddressId.Value);
+      var billingState = _stateProvinceService.GetStateProvinceById(billingAddress.StateProvinceId.Value);
+      var billingCountry = _countryService.GetCountryById(billingAddress.CountryId.Value);
       var cardNumber = processPaymentRequest.CreditCardNumber.Split('|')[0];
       bool useSavedCard = (processPaymentRequest.CreditCardNumber.StartsWith("T"));
 
@@ -667,7 +682,7 @@ namespace BitShift.Plugin.Payments.FirstData
             xml_writer.WriteElementString("Transaction_Type", (_firstDataStoreSetting.TransactionMode == (int)TransactMode.Authorize ? TransactionType.PreAuth : TransactionType.Purchase));  //check settings
             xml_writer.WriteElementString("DollarAmount", processPaymentRequest.OrderTotal.ToString());
 
-            if (processPaymentRequest.InitialOrderId == 0)
+            if (processPaymentRequest.InitialOrder.Id == 0)
             {
               if (useSavedCard)
               {
@@ -688,17 +703,17 @@ namespace BitShift.Plugin.Payments.FirstData
                 xml_writer.WriteElementString("Expiry_Date", processPaymentRequest.CreditCardExpireMonth.ToString("00") + processPaymentRequest.CreditCardExpireYear.ToString().Substring(2, 2));
                 xml_writer.WriteElementString("CardHoldersName", processPaymentRequest.CreditCardName);
                 xml_writer.WriteElementString("Card_Number", cardNumber);
-                xml_writer.WriteElementString("VerificationStr1", (customer.BillingAddress.Address1 ?? "") + "|"
-                                                                + (customer.BillingAddress.ZipPostalCode ?? "") + "|"
-                                                                + (customer.BillingAddress.StateProvince != null ? customer.BillingAddress.StateProvince.Name : "") + "|"
-                                                                + customer.BillingAddress.Country.ThreeLetterIsoCode);
+                xml_writer.WriteElementString("VerificationStr1", (billingAddress.Address1 ?? "") + "|"
+                                                                + (billingAddress.ZipPostalCode ?? "") + "|"
+                                                                + (billingState?.Name ?? "") + "|"
+                                                                + billingCountry?.ThreeLetterIsoCode);                
                 xml_writer.WriteElementString("VerificationStr2", processPaymentRequest.CreditCardCvv2);
                 xml_writer.WriteElementString("CVD_Presence_Ind", "1");
               }
             }
             else
             {
-              var initialOrder = _orderService.GetOrderById(processPaymentRequest.InitialOrderId);
+              var initialOrder = _orderService.GetOrderById(processPaymentRequest.InitialOrder.Id);
               int savedCardId = Convert.ToInt32(initialOrder.SubscriptionTransactionId.Substring(1));
               SavedCard card = _savedCardService.GetById(savedCardId);
               if (card == null)
@@ -717,9 +732,9 @@ namespace BitShift.Plugin.Payments.FirstData
             xml_writer.WriteElementString("Customer_Ref", customer.CustomerGuid.ToString());
             xml_writer.WriteElementString("Reference_No", processPaymentRequest.OrderGuid.ToString());
             xml_writer.WriteElementString("Client_IP", _webHelper.GetCurrentIpAddress());
-            xml_writer.WriteElementString("ZipCode", customer.BillingAddress.ZipPostalCode ?? "");
+            xml_writer.WriteElementString("ZipCode", billingAddress.ZipPostalCode ?? "");
             xml_writer.WriteEndElement();
-            String xml_string = string_builder.ToString();
+            string xml_string = string_builder.ToString();
 
             try
             {
@@ -749,7 +764,7 @@ namespace BitShift.Plugin.Payments.FirstData
                   {
                     SavedCard card = new SavedCard
                     {
-                      BillingAddress_Id = customer.BillingAddress.Id,
+                      BillingAddress_Id = customer.BillingAddressId.Value,
                       CardholderName = processPaymentRequest.CreditCardName,
                       CardType = response.SelectSingleNode("CardType").InnerText,
                       Customer_Id = customer.Id,
@@ -904,9 +919,6 @@ namespace BitShift.Plugin.Payments.FirstData
 
     public override void Install()
     {
-      //database objects
-      _objectContext.Install();
-
       //settings
       var settings = new FirstDataSettings
       {
@@ -1067,8 +1079,6 @@ namespace BitShift.Plugin.Payments.FirstData
       _localizationService.DeletePluginLocaleResource("BitShift.Plugin.FirstData.Fields.AllowDiscover");
       _localizationService.DeletePluginLocaleResource("BitShift.Plugin.FirstData.Fields.AllowDiscover.Hint");
       _localizationService.DeletePluginLocaleResource("bitshift.plugin.firstdata.paymentmethoddescription");
-
-      _objectContext.Uninstall();
 
       base.Uninstall();
     }

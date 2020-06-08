@@ -10,20 +10,26 @@ namespace BitShift.Plugin.Payments.FirstData.Tests.MockData
     public static Customer JohnDoe => new Customer
     {
       CustomerGuid = new Guid(),
-      BillingAddress = new Address
-      {
-        Address1 = "123 Fake St.",
-        StateProvince = new StateProvince
-        {
-          Abbreviation = "CA",
-          Name = "California"
-        },
-        Country = new Country
-        {
-          ThreeLetterIsoCode = "USA"
-        },
-        ZipPostalCode = "90210"
-      }
+      BillingAddressId = 1      
+    };
+
+    public static Address JohnDoesAddress => new Address
+    {
+      Address1 = "123 Fake St.",
+      StateProvinceId = 1,
+      CountryId = 1,
+      ZipPostalCode = "90210"
+    };
+
+    public static StateProvince StateProvince => new StateProvince
+    {
+      Abbreviation = "CA",
+      Name = "California"
+    };
+
+    public static Country USA => new Country
+    {
+      ThreeLetterIsoCode = "USA"
     };
   }
 }

@@ -8,14 +8,13 @@ using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Services.Common;
 using Nop.Services.Customers;
+using Nop.Services.Directory;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Orders;
 using Nop.Services.Plugins;
 using Nop.Services.Security;
 using System;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -43,6 +42,10 @@ namespace BitShift.Plugin.Payments.FirstData.Factories
     private readonly IGenericAttributeService _genericAttributeService;
     private readonly ICustomerService _customerService;
     private readonly IShoppingCartService _shoppingCartService;
+    private readonly IAddressService _addressService;
+    private readonly IStateProvinceService _stateProvinceService;
+    private readonly ICountryService _countryService;
+
 
     #endregion
 
@@ -53,9 +56,10 @@ namespace BitShift.Plugin.Payments.FirstData.Factories
         ILocalizationService localizationService, OrderSettings orderSettings,
         ISavedCardService savedCardService, IWorkContext workContext,
         ISavedCardModelFactory savedCardModelFactory, ILogger logger,
-        IHttpContextAccessor httpContextAccessor,
-        IEncryptionService encryptionService, IGenericAttributeService genericAttributeService,
-        ICustomerService customerService, IShoppingCartService shoppingCartService)
+        IHttpContextAccessor httpContextAccessor, IEncryptionService encryptionService, 
+        IGenericAttributeService genericAttributeService, ICustomerService customerService, 
+        IShoppingCartService shoppingCartService, IAddressService addressService,
+        IStateProvinceService stateProvinceService, ICountryService countryService)
     {
       _storeContext = storeContext;
       _localizationService = localizationService;
@@ -71,6 +75,9 @@ namespace BitShift.Plugin.Payments.FirstData.Factories
       _genericAttributeService = genericAttributeService;
       _customerService = customerService;
       _shoppingCartService = shoppingCartService;
+      _addressService = addressService;
+      _stateProvinceService = stateProvinceService;
+      _countryService = countryService;
 
       var pluginDescriptor = pluginService.GetPluginDescriptorBySystemName<FirstDataPaymentProcessor>("BitShift.Payments.FirstData", LoadPluginsMode.All);
       if (pluginDescriptor != null && pluginDescriptor.Installed)
@@ -207,17 +214,21 @@ namespace BitShift.Plugin.Payments.FirstData.Factories
       };
 
       _genericAttributeService.SaveAttribute(_workContext.CurrentCustomer, Constants.OrderTotalAttribute, model.OrderAmount);
-
-      var billingAddress = _workContext.CurrentCustomer.BillingAddress;
+      
+      var billingAddress = _addressService.GetAddressById(_workContext.CurrentCustomer.BillingAddressId.GetValueOrDefault());
       if (billingAddress != null)
       {
         model.Address1 = billingAddress.Address1;
         model.City = billingAddress.City;
-        model.State = billingAddress.StateProvince?.Abbreviation;
-        model.Country = billingAddress.Country?.ThreeLetterIsoCode;
         model.Zip = billingAddress.ZipPostalCode;
-      }
 
+        var state = _stateProvinceService.GetStateProvinceById(billingAddress.StateProvinceId.GetValueOrDefault());
+        var country = _countryService.GetCountryById(billingAddress.CountryId.GetValueOrDefault());
+
+        model.State = state?.Abbreviation;
+        model.Country = country?.ThreeLetterIsoCode;
+      }
+      
       DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
       TimeSpan diff = DateTime.UtcNow - origin;
       var ticks = Math.Floor(diff.TotalSeconds);

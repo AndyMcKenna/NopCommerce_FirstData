@@ -23,7 +23,7 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     private FirstDataStoreSetting _storeSetting;
 
     [SetUp]
-    public override void Setup()
+    public void FirstDataSetup()
     {
       Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
 

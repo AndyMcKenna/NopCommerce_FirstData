@@ -1,20 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Copyright>Copyright © BitShift Web Solutions LLC</Copyright>
     <Company>BitShift Web Solutions LLC</Company>
     <Authors>Andy McKenna, BitShift Web Solutions LLC</Authors>
-    <Version>4.1.13</Version>
+    <Version>4.3.13</Version>
     <Description>This plugin allows you accept credit card payments</Description>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageProjectUrl>http://www.bitshiftweb.com/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AndyMcKenna/NopCommerce_FirstData</PackageProjectUrl>
+    <PackageLicenseExpression>https://licenses.nuget.org/MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data\FirstDataStoreSettingMap.cs" />
-    <None Remove="Data\SavedCardMap.cs" />
-    <None Remove="Data\FirstDataObjectContext.cs" />
     <None Remove="DependencyRegistrar.cs" />
     <None Remove="Domain\Constants.cs" />
     <None Remove="Domain\SavedCard.cs" />
@@ -89,22 +87,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
-    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.165" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="8.6.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Libraries\Nop.Core\Nop.Core.csproj">
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Libraries\Nop.Data\Nop.Data.csproj">
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Libraries\Nop.Services\Nop.Services.csproj">
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj">
-      <Private>false</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\Nop.Data\Nop.Data.csproj" />
+    <ProjectReference Include="..\..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

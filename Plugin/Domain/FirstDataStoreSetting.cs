@@ -5,7 +5,6 @@ namespace BitShift.Plugin.Payments.FirstData.Domain
 {
   public class FirstDataStoreSetting : BaseEntity
   {
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public int StoreId { get; set; }
 
     public bool UseSandbox { get; set; }

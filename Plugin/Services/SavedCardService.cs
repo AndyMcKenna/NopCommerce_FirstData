@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Nop.Core.Data;
 using BitShift.Plugin.Payments.FirstData.Domain;
+using Nop.Data;
 
 namespace BitShift.Plugin.Payments.FirstData.Services
 {

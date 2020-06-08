@@ -13,6 +13,7 @@ using Nop.Services.Logging;
 using Nop.Core;
 using BitShift.Plugin.Payments.FirstData.Services;
 using Nop.Services.Common;
+using Nop.Services.Customers;
 
 namespace BitShift.Plugin.Payments.FirstData.Events
 {
@@ -25,11 +26,12 @@ namespace BitShift.Plugin.Payments.FirstData.Events
     private readonly IWorkContext _workContext;
     private readonly FirstDataStoreSetting _firstDataStoreSetting;
     private readonly IGenericAttributeService _genericAttributeService;
+    private readonly ICustomerService _customerService;
 
     public OrderPlacedConsumer(FirstDataSettings firstDataSettings, IOrderProcessingService orderProcessingService,
         ILogger logger, IWorkContext workContext, IOrderService orderService,
         IStoreContext storeContext, IFirstDataStoreSettingService firstDataStoreSettingService,
-        IGenericAttributeService genericAttributeService)
+        IGenericAttributeService genericAttributeService, ICustomerService customerService)
     {
       _firstDataSettings = firstDataSettings;
       _orderProcessingService = orderProcessingService;
@@ -37,6 +39,7 @@ namespace BitShift.Plugin.Payments.FirstData.Events
       _logger = logger;
       _workContext = workContext;
       _genericAttributeService = genericAttributeService;
+      _customerService = customerService;
 
       _firstDataStoreSetting = firstDataStoreSettingService.GetByStore(storeContext.CurrentStore.Id);
     }
@@ -59,8 +62,8 @@ namespace BitShift.Plugin.Payments.FirstData.Events
           var warnings = _orderProcessingService.Capture(e.Order);
           if (warnings.Count > 0)
           {
-            var errorText = String.Join("<br />", warnings.ToArray());
-            e.Order.OrderNotes.Add(new OrderNote
+            var errorText = string.Join("<br />", warnings.ToArray());
+            _orderService.InsertOrderNote(new OrderNote
             {
               CreatedOnUtc = DateTime.UtcNow,
               DisplayToCustomer = false,
@@ -72,8 +75,9 @@ namespace BitShift.Plugin.Payments.FirstData.Events
           }
           else
           {
-            _genericAttributeService.SaveAttribute(e.Order.Customer, Constants.AuthorizationAttribute, "");
-            _genericAttributeService.SaveAttribute(e.Order.Customer, Constants.OrderTotalAttribute, "");
+            var customer = _customerService.GetCustomerById(e.Order.CustomerId);
+            _genericAttributeService.SaveAttribute(customer, Constants.AuthorizationAttribute, "");
+            _genericAttributeService.SaveAttribute(customer, Constants.OrderTotalAttribute, "");
           }
         }
         catch (Exception ex)

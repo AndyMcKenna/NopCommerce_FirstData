@@ -51,13 +51,15 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     private Mock<ILogger> _logger;
     private Mock<ISavedCardService> _savedCardService;
     private Mock<IOrderService> _orderService;
-    private FirstDataObjectContext _objectContext;
     private Mock<IFirstDataStoreSettingService> _firstDataStoreSettingService;
     private Mock<IHttpContextAccessor> _httpContextAccessor;
     private Mock<IGenericAttributeService> _genericAttributeService;
     private Mock<IPaymentService> _paymentService;
     private Mock<IPluginService> _pluginService;
     private Mock<IWebRequest> _webRequest;
+    private Mock<IStateProvinceService> _stateProvinceService;
+    private Mock<ICountryService> _countryService;
+    private Mock<IAddressService> _addressService;
     private Mock<HttpWebRequest> _httpWebRequest;
     private Mock<HttpWebResponse> _httpWebResponse;
     private WidgetSettings _widgetSettings;
@@ -89,6 +91,9 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _paymentService = new Mock<IPaymentService>();
       _pluginService = new Mock<IPluginService>();
       _webRequest = new Mock<IWebRequest>();
+      _stateProvinceService = new Mock<IStateProvinceService>();
+      _countryService = new Mock<ICountryService>();
+      _addressService = new Mock<IAddressService>();
       _httpWebRequest = new Mock<HttpWebRequest>();
       _httpWebResponse = new Mock<HttpWebResponse>();
 
@@ -125,7 +130,7 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
 
       _storeContext.Setup(s => s.CurrentStore).Returns(new Store { Id = 0 });
       _webHelper.Setup(w => w.GetCurrentIpAddress()).Returns("127.0.0.1");
-      _currencyService.Setup(c => c.GetCurrencyById(It.IsAny<int>(), It.IsAny<bool>())).Returns(new Currency { CurrencyCode = "USD" });
+      _currencyService.Setup(c => c.GetCurrencyById(It.IsAny<int>())).Returns(new Currency { CurrencyCode = "USD" });
       _encryptionService.Setup(e => e.DecryptText(It.IsAny<string>(), It.IsAny<string>())).Returns("");
       _localizationService.Setup(l => l.GetResource(It.IsAny<string>())).Returns<string>(x => x);
       _genericAttributeService.Setup(g => g.GetAttribute(It.IsAny<Customer>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>())).Returns("");
@@ -146,12 +151,15 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     {
       _firstDataStoreSettingService.Setup(x => x.GetByStore(It.IsAny<int>(), It.IsAny<bool>())).Returns(_fdStoreSetting);
       _httpWebResponse.Setup(w => w.GetResponseStream()).Returns(FirstDataStreamResponses.AuthorizationSuccess);
+      _addressService.Setup(a => a.GetAddressById(It.IsAny<int>())).Returns(MockCustomer.JohnDoesAddress);
+      _stateProvinceService.Setup(a => a.GetStateProvinceById(It.IsAny<int>())).Returns(MockCustomer.StateProvince);
+      _countryService.Setup(a => a.GetCountryById(It.IsAny<int>())).Returns(MockCustomer.USA);
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object, 
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object, 
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object, 
+        _countryService.Object, _widgetSettings);
 
       var result = processor.ProcessPayment(MockProcessPaymentRequest.Standard);
 
@@ -173,11 +181,15 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _firstDataStoreSettingService.Setup(x => x.GetByStore(It.IsAny<int>(), It.IsAny<bool>())).Returns(fdStoreSetting);
       _httpWebResponse.Setup(w => w.GetResponseStream()).Returns(FirstDataStreamResponses.AuthorizationCaptureSuccess);
 
+      _addressService.Setup(a => a.GetAddressById(It.IsAny<int>())).Returns(MockCustomer.JohnDoesAddress);
+      _stateProvinceService.Setup(a => a.GetStateProvinceById(It.IsAny<int>())).Returns(MockCustomer.StateProvince);
+      _countryService.Setup(a => a.GetCountryById(It.IsAny<int>())).Returns(MockCustomer.USA);
+
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.ProcessPayment(MockProcessPaymentRequest.Standard);
 
@@ -195,10 +207,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _orderService.Setup(o => o.UpdateOrder(It.IsAny<Nop.Core.Domain.Orders.Order>()));
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.Capture(MockCapturePaymentRequest.Standard);
 
@@ -216,10 +228,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _orderService.Setup(o => o.UpdateOrder(It.IsAny<Nop.Core.Domain.Orders.Order>()));
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.Refund(MockRefundPaymentRequest.Full);
 
@@ -236,10 +248,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _orderService.Setup(o => o.UpdateOrder(It.IsAny<Nop.Core.Domain.Orders.Order>()));
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.Refund(MockRefundPaymentRequest.Partial);
 
@@ -256,10 +268,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _orderService.Setup(o => o.UpdateOrder(It.IsAny<Nop.Core.Domain.Orders.Order>()));
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.Refund(MockRefundPaymentRequest.PartialTooMuch);
 
@@ -275,10 +287,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       _paymentService.Setup(p => p.DeserializeCustomValues(It.IsAny<Nop.Core.Domain.Orders.Order>())).Returns(MockVoidPaymentRequest.CustomValues);
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object,
-        _objectContext, _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var result = processor.Void(MockVoidPaymentRequest.Standard);
 
@@ -303,10 +315,10 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       form.Setup(f => f["savedCardId"]).Returns("");
 
       var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
-        _currencySettings, _webHelper.Object, _orderTotalCalculationService.Object, _storeInformationSettings, _workContext.Object,
-        _encryptionService.Object, _localizationService.Object, _logger.Object, _webRequest.Object, _savedCardService.Object, _orderService.Object, _objectContext,
-        _storeContext.Object, _firstDataStoreSettingService.Object, _pluginService.Object, _httpContextAccessor.Object,
-        _genericAttributeService.Object, _paymentService.Object, _widgetSettings);
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
 
       var request = processor.GetPaymentInfo(form.Object);
 
