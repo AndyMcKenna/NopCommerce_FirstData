@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Credit Card",
+  "SystemName": "BitShift.Payments.FirstData",
+  "Version": "4.1.13",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Andy McKenna (BitShift Web Solutions)",
+  "DisplayOrder": 1,
+  "FileName": "BitShift.Plugin.Payments.FirstData.dll",
+  "Description": "Credit Card payments using First Data's Global Gateway e4 API - https://github.com/AndyMcKenna/NopCommerce_FirstData"
+}

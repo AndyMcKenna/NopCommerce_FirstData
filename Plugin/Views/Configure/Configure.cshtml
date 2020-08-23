@@ -1,0 +1,16 @@
+﻿@{
+  Layout = "_ConfigurePlugin";
+}
+@model ConfigurationModel
+@using BitShift.Plugin.Payments.FirstData.Models;
+
+<form asp-controller="FirstData" asp-action="Configure" method="post" id="order-form">
+  <div class="content">
+    <div class="form-horizontal">
+      <nop-tabs id="order-edit">
+        <nop-tab asp-name="tab-configure" asp-title="@T("BitShift.Plugin.FirstData.Configure")" asp-default="true">@await Html.PartialAsync("~/Plugins/BitShift.Payments.FirstData/Views/Configure/_Configure.Configure.cshtml", Model)</nop-tab>
+        <nop-tab asp-name="tab-store" asp-title="@T("BitShift.Plugin.FirstData.Stores")">@await Html.PartialAsync("~/Plugins/BitShift.Payments.FirstData/Views/Configure/_Configure.Stores.cshtml", Model)</nop-tab>
+      </nop-tabs>
+    </div>
+  </div>
+</form>
