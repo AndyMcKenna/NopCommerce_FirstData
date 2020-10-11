@@ -255,8 +255,8 @@ namespace BitShift.Plugin.Payments.FirstData
         throw new ArgumentException("customer must have a billing address");
       }
       var billingAddress = _addressService.GetAddressById(customer.BillingAddressId.Value);
-      var billingState = _stateProvinceService.GetStateProvinceById(billingAddress.StateProvinceId.Value);
-      var billingCountry = _countryService.GetCountryById(billingAddress.CountryId.Value);
+      var billingState = _stateProvinceService.GetStateProvinceById(billingAddress.StateProvinceId.GetValueOrDefault());
+      var billingCountry = _countryService.GetCountryById(billingAddress.CountryId.GetValueOrDefault());
 
       if (_firstDataStoreSetting.TransactionMode == (int)TransactMode.HostedPaymentPagePostCapture ||
           _firstDataStoreSetting.TransactionMode == (int)TransactMode.HostedPaymentPageAuthOnly)
@@ -321,7 +321,7 @@ namespace BitShift.Plugin.Payments.FirstData
                 
                 xml_writer.WriteElementString("VerificationStr1", (billingAddress.Address1 ?? "") + "|"
                                                                 + (billingAddress.ZipPostalCode ?? "") + "|"
-                                                                + (billingState?.Name ?? "") + "|"
+                                                                + (billingState != null ? $"{billingState.Name}|" : "")
                                                                 + billingCountry?.ThreeLetterIsoCode);
                 
                 xml_writer.WriteElementString("VerificationStr2", processPaymentRequest.CreditCardCvv2);

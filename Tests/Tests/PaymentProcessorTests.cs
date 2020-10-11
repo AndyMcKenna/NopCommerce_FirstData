@@ -170,6 +170,29 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
     }
 
     [Test]
+    public void ProcessPayment_NoStateCountry_Success()
+    {
+      _firstDataStoreSettingService.Setup(x => x.GetByStore(It.IsAny<int>(), It.IsAny<bool>())).Returns(_fdStoreSetting);
+      _httpWebResponse.Setup(w => w.GetResponseStream()).Returns(FirstDataStreamResponses.AuthorizationSuccess);
+      _addressService.Setup(a => a.GetAddressById(It.IsAny<int>())).Returns(MockCustomer.JohnDoesAddress);
+      _stateProvinceService.Setup(a => a.GetStateProvinceById(It.IsAny<int>())).Returns((StateProvince)null);
+      _countryService.Setup(a => a.GetCountryById(It.IsAny<int>())).Returns((Nop.Core.Domain.Directory.Country)null);
+
+      var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
+
+      var result = processor.ProcessPayment(MockProcessPaymentRequest.Standard);
+
+      Assert.AreEqual(0, result.Errors.Count);
+      Assert.AreNotEqual("", result.AuthorizationTransactionId);
+      Assert.AreEqual(null, result.CaptureTransactionId);
+      Assert.AreEqual(PaymentStatus.Authorized, result.NewPaymentStatus);
+    }
+
+    [Test]
     public void ProcessPayment_AuthorizeCapture_Success()
     {
       var fdStoreSetting = new FirstDataStoreSetting
@@ -217,6 +240,29 @@ namespace BitShift.Plugin.Payments.FirstData.Tests
       Assert.AreEqual(0, result.Errors.Count);
       Assert.AreNotEqual(null, result.CaptureTransactionId);
       Assert.AreEqual(PaymentStatus.Paid, result.NewPaymentStatus);
+    }
+
+    [Test]
+    public void BillingCountryWithoutState_Success()
+    {
+      _firstDataStoreSettingService.Setup(x => x.GetByStore(It.IsAny<int>(), It.IsAny<bool>())).Returns(_fdStoreSetting);
+      _httpWebResponse.Setup(w => w.GetResponseStream()).Returns(FirstDataStreamResponses.AuthorizationSuccess);
+      _addressService.Setup(a => a.GetAddressById(It.IsAny<int>())).Returns(MockCustomer.SerbianAddress);
+      _stateProvinceService.Setup(a => a.GetStateProvinceById(It.IsAny<int>())).Returns((StateProvince)null);
+      _countryService.Setup(a => a.GetCountryById(It.IsAny<int>())).Returns(MockCustomer.Serbia);
+
+      var processor = new FirstDataPaymentProcessor(_firstDataSettings, _settingService.Object, _currencyService.Object, _customerService.Object,
+        _currencySettings, _webHelper.Object, _workContext.Object, _encryptionService.Object, _localizationService.Object, _logger.Object,
+        _webRequest.Object, _savedCardService.Object, _orderService.Object, _storeContext.Object, _addressService.Object, _firstDataStoreSettingService.Object,
+        _pluginService.Object, _httpContextAccessor.Object, _genericAttributeService.Object, _paymentService.Object, _stateProvinceService.Object,
+        _countryService.Object, _widgetSettings);
+
+      var result = processor.ProcessPayment(MockProcessPaymentRequest.Standard);
+
+      Assert.AreEqual(0, result.Errors.Count);
+      Assert.AreNotEqual("", result.AuthorizationTransactionId);
+      Assert.AreEqual(null, result.CaptureTransactionId);
+      Assert.AreEqual(PaymentStatus.Authorized, result.NewPaymentStatus);
     }
 
     [Test]

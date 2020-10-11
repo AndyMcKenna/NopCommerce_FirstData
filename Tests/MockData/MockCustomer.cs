@@ -21,6 +21,15 @@ namespace BitShift.Plugin.Payments.FirstData.Tests.MockData
       ZipPostalCode = "90210"
     };
 
+    public static Address SerbianAddress => new Address
+    {
+      Address1 = "Dragoslava Jovanovića 2",
+      City = "Beograd",
+      StateProvinceId = null,
+      CountryId = 189,
+      ZipPostalCode = "11000"
+    };
+
     public static StateProvince StateProvince => new StateProvince
     {
       Abbreviation = "CA",
@@ -30,6 +39,11 @@ namespace BitShift.Plugin.Payments.FirstData.Tests.MockData
     public static Country USA => new Country
     {
       ThreeLetterIsoCode = "USA"
+    };
+
+    public static Country Serbia => new Country
+    {
+      ThreeLetterIsoCode = "SRB"
     };
   }
 }
